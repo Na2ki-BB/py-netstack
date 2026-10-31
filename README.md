@@ -1,3 +1,12 @@
+## コマンド
+
+### TAP作成
+```bash
+sudo ip tuntap add dev taplab0 mode tap user "$USER"
+sudo ip addr add 10.10.0.1/24 dev taplab0
+sudo ip link set taplab0 up
+```
+
 ## 参考
 
 ### EtherType一覧
@@ -26,3 +35,11 @@ EthernetとIPv4を使う一般的なARPメッセージは、次の構造にな�
 | 24〜27 | 4B | Target IP | 対象IPv4アドレス |
 
 ※位置はARPメッセージの先頭を `0` としたもの。Ethernetフレーム全体の先頭ではない。
+
+### カーネル仕様での定義
+
+| 定数 | 値（16進数） | 意味 |
+|---|---|---|
+| `TUNSETIFF` | `0x400454CA` | TUN/TAPデバイスにインターフェース名や動作モードを設定する制御命令番号 |
+| `IFF_TAP` | `0x0002` | Ethernetフレームを扱うTAPモードを指定する |
+| `IFF_NO_PI` | `0x1000` | TUN/TAP独自の追加4バイトの情報（Packet Information）を付けない |
