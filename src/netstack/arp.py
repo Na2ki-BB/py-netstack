@@ -29,3 +29,39 @@ def parse_arp(payload):
         "target_mac": target_mac,
         "target_ip": target_ip
     }
+
+
+def build_arp_reply(request, local_mac, local_ip):
+    # ARP Requestかつ自分のIP宛て以外は返信しない
+    if request["opcode"] != 1:
+        return None
+    
+    if request["target_ip"] != local_ip:
+        return None
+
+    
+    local_mac_bytes = bytes.fromhex(local_mac.replace(":", ""))
+    requester_mac_bytes = bytes.fromhex(
+        request["sender_mac"].replace(":", "")
+    )
+
+    if len(local_mac_bytes) != 6 or len(requester_mac_bytes)  != 6:
+        raise ValueError("MACアドレスが6バイトでないよ♪")
+
+    header = (
+        (1).to_bytes(2, "big") +
+        (0x0800).to_bytes(2, "big") +
+        bytes([6, 4]) +
+        (2).to_bytes(2, "big")
+    )
+
+
+    reply = (
+        header +
+        local_mac_bytes +
+        IPv4Address(local_ip).packed +
+        requester_mac_bytes +
+        IPv4Address(request["sender_ip"]).packed
+    )
+
+    return reply
