@@ -1,4 +1,4 @@
-from netstack.ethernet import parse_ethernet
+from netstack.ethernet import parse_ethernet, build_ethernet
 from netstack.arp import parse_arp, build_arp_reply
 
 frame = bytes.fromhex(
@@ -77,3 +77,25 @@ expected_reply = bytes.fromhex(
 assert reply_bytes == expected_reply
 
 print("ARP Reply binary test: OK")
+
+# ARP ReplyをEthernetフレームに格納
+ethernet_reply = build_ethernet(
+    arp["sender_mac"],
+    LOCAL_MAC,
+    0x0806,
+    reply_bytes
+)
+
+assert len(ethernet_reply) == 42
+
+# Ethernetヘッダーのバイト列を検証
+expected_header = bytes.fromhex(
+    "02 00 00 00 00 01 "
+    "02 00 00 00 00 02 "
+    "08 06"
+)
+
+assert ethernet_reply[:14] == expected_header
+assert ethernet_reply[14:] == expected_reply
+
+print("Ethernet Reply builder: OK")

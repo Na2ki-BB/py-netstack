@@ -31,3 +31,21 @@ def parse_ethernet(frame):
         "frame_length": frame_length,
         "payload": frame[14:]
     }
+
+
+def build_ethernet(dst_mac, src_mac, ether_type, payload):
+    dst = bytes.fromhex(dst_mac.replace(":", ""))
+    src = bytes.fromhex(src_mac.replace(":", ""))
+
+    if len(dst) != 6 or len(src) != 6:
+        raise ValueError("MACアドレスの長さがおかしいよ")
+
+    # Ethernetヘッダーとpayloadを結合
+    frame = (
+        dst +
+        src +
+        ether_type.to_bytes(2, "big") +
+        payload
+    )
+
+    return frame
