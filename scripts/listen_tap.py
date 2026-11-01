@@ -5,6 +5,7 @@ import struct
 from netstack.ethernet import parse_ethernet, build_ethernet
 from netstack.arp import parse_arp, build_arp_reply
 from netstack.ipv4 import parse_ipv4
+from netstack.icmp import parse_icmp_echo
 
 TUNSETIFF = 0x400454CA
 IFF_TAP = 0x0002
@@ -42,6 +43,19 @@ try:
                     "Protocol:",
                     ipv4["protocol"]
                 )
+
+                if ipv4["protocol"] == 1:
+                    icmp = parse_icmp_echo(ipv4["payload"])
+
+                    if icmp is not None:
+                        print(
+                            "ICMP Echo:",
+                            "Request" if icmp["type"] == 8 else  "Reply",
+                            "Sequence:",
+                            icmp["sequence"],
+                            "Data length:",
+                            len(icmp["data"])
+                        )
 
             continue
 
