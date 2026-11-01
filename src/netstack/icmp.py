@@ -1,3 +1,6 @@
+from netstack.checksum import internet_checksum
+
+
 def parse_icmp_echo(message):
     if len(message) < 8:
         return None
@@ -22,3 +25,26 @@ def parse_icmp_echo(message):
         "sequence": sequence,
         "data": data
     }
+
+
+def build_icmp_echo_reply(request):
+    if request["type"] != 8 or request["code"] != 0:
+        return None
+
+    reply_without_checksum = (
+        bytes([0, 0]) +
+        b"\x00\x00" +
+        request["identifier"].to_bytes(2, "big") +
+        request["sequence"].to_bytes(2, "big") +
+        request["data"]
+    )
+
+    checksum = internet_checksum(reply_without_checksum)
+
+    reply = (
+        reply_without_checksum[:2] +
+        checksum.to_bytes(2, "big") +
+        reply_without_checksum[4:]
+    )
+
+    return reply
