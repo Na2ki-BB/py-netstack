@@ -4,6 +4,7 @@ import struct
 
 from netstack.ethernet import parse_ethernet, build_ethernet
 from netstack.arp import parse_arp, build_arp_reply
+from netstack.ipv4 import parse_ipv4
 
 TUNSETIFF = 0x400454CA
 IFF_TAP = 0x0002
@@ -28,6 +29,22 @@ try:
 
         if ethernet is None:
             continue
+
+        if ethernet["protocol"] == "IPv4":
+            ipv4 = parse_ipv4(ethernet["payload"])
+
+            if ipv4 is not None:
+                print(
+                    "IPv4:",
+                    ipv4["src_ip"],
+                    "->",
+                    ipv4["dst_ip"],
+                    "Protocol:",
+                    ipv4["protocol"]
+                )
+
+            continue
+
 
         if ethernet["protocol"] != "ARP":
             continue
