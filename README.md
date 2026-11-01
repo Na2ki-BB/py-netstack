@@ -43,3 +43,9 @@ EthernetとIPv4を使う一般的なARPメッセージは、次の構造にな�
 | `TUNSETIFF` | `0x400454CA` | TUN/TAPデバイスにインターフェース名や動作モードを設定する制御命令番号 |
 | `IFF_TAP` | `0x0002` | Ethernetフレームを扱うTAPモードを指定する |
 | `IFF_NO_PI` | `0x1000` | TUN/TAP独自の追加4バイトの情報（Packet Information）を付けない |
+
+
+### プロトコル番号
+
+https://www.iana.org/assignments/protocol-numbers
+
