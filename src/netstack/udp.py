@@ -16,6 +16,7 @@ def parse_udp(datagram):
     if length > len(datagram):
         return None
 
+    # 実際の値でなくheader内に記載されたサイズをpayloadに入れる
     payload = datagram[8:length]
 
     return {
@@ -34,6 +35,7 @@ def build_udp_pseudo_header(src_ip, dst_ip, udp_length):
 
     
     return(
+        # 値をバイト列表現にしてつなぎ合わせる
         IPv4Address(src_ip).packed +
         IPv4Address(dst_ip).packed +
         bytes([0, 17]) +
@@ -59,3 +61,41 @@ def verify_udp_checksum(datagram, src_ip, dst_ip):
     result = internet_checksum(pseudo_header + udp_bytes)
 
     return result == 0
+
+
+def build_udp(src_ip, dst_ip, src_port, dst_port, payload):
+    if src_port < 0 or src_port > 65535:
+        raise ValueError("送信元ポート番号がおかしいよ")
+
+    if dst_port < 0 or dst_port > 65535:
+        raise ValueError("宛先ポート番号がおかしいよ")
+
+    udp_length = 8 + len(payload)
+
+    if udp_length > 65535 - 20:
+        raise ValueError("IPv4に格納しきれない大きさだよ")
+
+    datagram_without_checksum = (
+        src_port.to_bytes(2, "big") +
+        dst_port.to_bytes(2, "big") +
+        udp_length.to_bytes(2, "big") +
+        b"\x00\x00" +
+        payload
+    )
+
+    pseudo_header = build_udp_pseudo_header(
+        src_ip, dst_ip, udp_length
+    )
+
+    checksum = internet_checksum(
+        pseudo_header + datagram_without_checksum
+    )
+
+    if checksum == 0:
+        checksum = 0xFFFF
+
+    return (
+        datagram_without_checksum[:6] +
+        checksum.to_bytes(2, "big") +
+        datagram_without_checksum[8:]
+    )
