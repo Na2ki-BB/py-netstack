@@ -16,7 +16,6 @@ def parse_udp(datagram):
     if length > len(datagram):
         return None
 
-    # 実際の値でなくheader内に記載されたサイズをpayloadに入れる
     payload = datagram[8:length]
 
     return {
